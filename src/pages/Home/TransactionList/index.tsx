@@ -3,13 +3,22 @@ import React from 'react';
 import styled from 'styled-components';
 import { projectFirestore } from '../../../firebase/config';
 import { useFirestore } from '../../../hooks/useFirestore';
+import { ITransaction } from '../../../types';
 
-export default function TransactionList({
-  transactions,
-}: {
-  transactions: any;
-}) {
+type Props = {
+    transactions: ITransaction[];      
+}
+
+export default function TransactionList({ transactions }: Props) {
   const { deleteDocument } = useFirestore('transactions')
+  const total = transactions.reduce((prevTransaction: ITransaction, cur: ITransaction) => {
+    const totalAmount: ITransaction = {
+        id: null as unknown as string,
+        name: null as unknown as string,
+        amount: parseInt(prevTransaction.amount) + parseInt(cur.amount) as unknown as string,
+    }
+    return totalAmount
+  })
 
   const handleClick = async (id: string) => {
     const ref = doc(projectFirestore, 'transactions', id)
@@ -18,7 +27,8 @@ export default function TransactionList({
 
   return (
     <ul>
-      {transactions.map((transaction: any) => (
+        <h2>Total: ${total.amount}</h2>
+      {transactions.map((transaction) => (
         <Item key={transaction.id}>
           <Name className="name">{transaction.name}</Name>
           <Amount className="transactions amount">${transaction.amount}</Amount>

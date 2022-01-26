@@ -1,7 +1,13 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { useFirestore } from '../../../hooks/useFirestore';
 
-export default function TransactionForm({ uid }: { uid: number }) {
+type Props = {
+    uid: string,
+    name?: string,
+    amount?: string
+}
+
+export default function TransactionForm({ uid }: Props) {
   const [name, setName] = useState('');
   const [amount, setAmount] = useState('');
   const { addDocument, response } = useFirestore('transactions');
