@@ -1,42 +1,59 @@
-import { doc } from 'firebase/firestore';
-import React from 'react';
-import styled from 'styled-components';
-import { projectFirestore } from '../../../firebase/config';
-import { useFirestore } from '../../../hooks/useFirestore';
-import { ITransaction } from '../../../types';
+import { doc } from 'firebase/firestore'
+import { useMemo } from 'react'
+import styled from 'styled-components'
+import { projectFirestore } from '../../../firebase/config'
+import { useFirestore } from '../../../hooks/useFirestore'
+import { ITransaction } from '../../../types'
 
 type Props = {
-    transactions: ITransaction[];      
+  transactions: ITransaction[]
 }
 
 export default function TransactionList({ transactions }: Props) {
   const { deleteDocument } = useFirestore('transactions')
-  const total = transactions.reduce((prevTransaction: ITransaction, cur: ITransaction) => {
-    const totalAmount: ITransaction = {
-        id: null as unknown as string,
-        name: null as unknown as string,
-        amount: parseInt(prevTransaction.amount) + parseInt(cur.amount) as unknown as string,
-    }
-    return totalAmount
-  })
+
+  const initialValue: ITransaction = {
+    id: '',
+    name: '',
+    amount: '0',
+  }
+
+  const total = useMemo(() => {
+    if (transactions.length < 0) return
+
+    const total = transactions.reduce(
+      (prevTransaction: ITransaction, cur: ITransaction) => {
+        const totalAmount: ITransaction = {
+          id: null as unknown as string,
+          name: null as unknown as string,
+          amount: (parseInt(prevTransaction.amount) +
+            parseInt(cur.amount)) as unknown as string,
+        }
+        return totalAmount
+      },
+      initialValue
+    )
+
+    return total
+  }, [transactions])
 
   const handleClick = async (id: string) => {
     const ref = doc(projectFirestore, 'transactions', id)
-    await deleteDocument(ref);
+    await deleteDocument(ref)
   }
 
   return (
     <ul>
-        <h2>Total: ${total.amount}</h2>
+      <h2>Total: ${total?.amount}</h2>
       {transactions.map((transaction) => (
         <Item key={transaction.id}>
-          <Name className="name">{transaction.name}</Name>
-          <Amount className="transactions amount">${transaction.amount}</Amount>
+          <Name className='name'>{transaction.name}</Name>
+          <Amount className='transactions amount'>${transaction.amount}</Amount>
           <Button onClick={() => handleClick(transaction.id)}>X</Button>
         </Item>
       ))}
     </ul>
-  );
+  )
 }
 
 const Item = styled.li`
@@ -49,12 +66,12 @@ const Item = styled.li`
   position: relative;
   overflow: hidden;
   border-left: 4px solid #1f9751;
-`;
+`
 
 const Name = styled.p`
   color: #777;
   font-size: 1.4em;
-`;
+`
 
 const Amount = styled.p`
   margin-left: auto;
@@ -62,7 +79,7 @@ const Amount = styled.p`
   color: #777;
   font-weight: bold;
   font-size: 1.6em;
-`;
+`
 
 const Button = styled.button`
   position: absolute;
@@ -76,4 +93,4 @@ const Button = styled.button`
   line-height: 0;
   font-size: 0.9em;
   cursor: pointer;
-`;
+`
