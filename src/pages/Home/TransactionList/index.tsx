@@ -35,6 +35,7 @@ export default function TransactionList({ transactions }: Props) {
     )
 
     return total
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [transactions])
 
   const handleClick = async (id: string) => {
